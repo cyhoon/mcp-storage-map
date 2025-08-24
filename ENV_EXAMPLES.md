@@ -88,7 +88,6 @@ DB_WRITE_MODE=true
         "STORAGE_MYSQL_PASSWORD": "password",
         "STORAGE_MYSQL_DATABASE": "myapp",
         "STORAGE_MYSQL_WRITE_MODE": "true",
-        
         "STORAGE_MONGO_TYPE": "mongodb",
         "STORAGE_MONGO_URI": "mongodb://localhost:27017/logs"
       }

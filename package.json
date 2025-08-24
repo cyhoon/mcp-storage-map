@@ -32,7 +32,8 @@
     "lru-cache": "^10.1.0",
     "mysql2": "^3.14.3",
     "p-queue": "^8.0.1",
-    "winston": "^3.11.0"
+    "winston": "^3.11.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^24.2.1",
