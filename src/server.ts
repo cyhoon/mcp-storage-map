@@ -2,10 +2,10 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { parseStorageConfigs, StorageConfig } from "./config.js";
-import { MySQLClient } from "./clients/mysql.js";
+import { registry } from "./mcp-connectors/index.js";
+import { MySQLConnector } from "./clients/index.js";
 
 let storageConfigs: StorageConfig[] = [];
-const storageClients = new Map<string, MySQLClient>();
 
 const mcpServer = new McpServer({
   name: "storage-map",
@@ -47,34 +47,18 @@ mcpServer.tool(
   },
   async ({ storage_id, query, parameters }) => {
     const config = storageConfigs.find(c => c.id === storage_id);
-
     if (!config) {
       throw new Error(`Storage ${storage_id} not found`);
     }
     
-    let result;
-
-    if (config.type === 'mysql') {
-      const client = storageClients.get(storage_id);
-
-      if (!client) {
-        throw new Error(`MySQL client not initialized for ${storage_id}`);
-      }
-
-      const rows = await client.query(query, parameters);
-
-      result = { rows, rowCount: Array.isArray(rows) ? rows.length : 0 };
-    } else {
-      result = { message: `Query not implemented for ${config.type}` };
-    }
+    const connector = registry.getConnector(storage_id, config);
+    const result = await connector.query(query, parameters);
     
     return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result, null, 2),
-        },
-      ],
+      content: [{
+        type: "text" as const,
+        text: result.text,
+      }],
     };
   }
 );
@@ -93,37 +77,18 @@ mcpServer.tool(
       throw new Error(`Storage ${storage_id} not found`);
     }
     
-    let result;
-
-    if (config.type === 'mysql') {
-      const client = storageClients.get(storage_id);
-
-      if (!client) {
-        throw new Error(`MySQL client not initialized for ${storage_id}`);
-      }
-
-      const execResult = await client.execute(operation, parameters) as unknown as {
-        affectedRows: number;
-        insertId?: number;
-      };
-
-      result = { affectedRows: execResult.affectedRows, insertId: execResult.insertId };
-    } else {
-      result = { message: `Execute not implemented for ${config.type}` };
-    }
+    const connector = registry.getConnector(storage_id, config);
+    const result = await connector.execute(operation, parameters);
     
     return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result, null, 2),
-        },
-      ],
+      content: [{
+        type: "text" as const,
+        text: result.text,
+      }],
     };
   }
 );
 
-// Tool: list_collections
 mcpServer.tool(
   "list_collections",
   "List collections/tables/datasets in a storage (tables for RDB, collections for NoSQL, datasets for Athena)",
@@ -137,30 +102,18 @@ mcpServer.tool(
       throw new Error(`Storage ${storage_id} not found`);
     }
     
-    let result;
-    if (config.type === 'mysql') {
-      const client = storageClients.get(storage_id);
-      if (!client) {
-        throw new Error(`MySQL client not initialized for ${storage_id}`);
-      }
-      const tables = await client.listTables(schema);
-      result = { tables };
-    } else {
-      result = { message: `List collections not implemented for ${config.type}` };
-    }
+    const connector = registry.getConnector(storage_id, config);
+    const result = await connector.listCollections(schema);
     
     return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result, null, 2),
-        },
-      ],
+      content: [{
+        type: "text" as const,
+        text: result.text,
+      }],
     };
   }
 );
 
-// Tool: describe_collection
 mcpServer.tool(
   "describe_collection",
   "Get schema/structure information for a collection/table",
@@ -175,30 +128,18 @@ mcpServer.tool(
       throw new Error(`Storage ${storage_id} not found`);
     }
     
-    let result;
-    if (config.type === 'mysql') {
-      const client = storageClients.get(storage_id);
-      if (!client) {
-        throw new Error(`MySQL client not initialized for ${storage_id}`);
-      }
-      const columns = await client.describeTable(collection, schema);
-      result = { columns };
-    } else {
-      result = { message: `Describe collection not implemented for ${config.type}` };
-    }
+    const connector = registry.getConnector(storage_id, config);
+    const result = await connector.describeCollection(collection, schema);
     
     return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result, null, 2),
-        },
-      ],
+      content: [{
+        type: "text" as const,
+        text: result.text,
+      }],
     };
   }
 );
 
-// Tool: get_storage_info
 mcpServer.tool(
   "get_storage_info",
   "Get detailed information about a specific storage connection",
@@ -242,13 +183,15 @@ function initializeStorages() {
     console.error("  STORAGE_<ID>_TYPE, STORAGE_<ID>_HOST, etc.");
     console.error("  Or STORAGE_CONFIG with JSON array");
     console.error("  Or simple DB_TYPE, DB_HOST, etc.");
-    return
+    return;
   }
 
+  registry.register('mysql', MySQLConnector);
+  // registry.register('athena', AthenaConnector);
+  // registry.register('mongodb', MongoDBConnector);
+  
   storageConfigs.forEach(config => {
-    if (config.type === 'mysql') {
-      storageClients.set(config.id, new MySQLClient(config));
-    }
+    console.error(`  - ${config.id} (${config.type}) writeMode=${config.writeMode || false}`);
   });
 }
 
