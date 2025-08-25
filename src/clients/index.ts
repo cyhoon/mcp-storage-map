@@ -1,1 +1,1 @@
-export { MySQLConnector } from './mysql-client';
+export { MySQLConnector } from './mysql-client/index.js';
