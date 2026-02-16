@@ -1,35 +1,42 @@
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@10.18.0 --activate
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY yarn.lock* ./
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
 
-RUN npm pkg delete scripts.prepare
+# Install dependencies
+RUN pnpm install --frozen-lockfile
 
-RUN npm ci
-
-RUN npm pkg set scripts.prepare="npm run build"
-
+# Copy source code
 COPY tsconfig.json ./
 COPY src ./src
 
-RUN npm run build
+# Build
+RUN pnpm build
 
-FROM node:20-alpine
+# Production image
+FROM node:24-alpine
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@10.18.0 --activate
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY yarn.lock* ./
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
 
-RUN npm pkg delete scripts.prepare
+# Install production dependencies only
+RUN pnpm install --frozen-lockfile --prod && \
+    pnpm store prune
 
-RUN npm ci --omit=dev && \
-    npm cache clean --force
-
+# Copy built files from builder
 COPY --from=builder /app/build ./build
 
+# Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
