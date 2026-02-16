@@ -20,7 +20,7 @@ pnpm dlx @storage-map/mcp-server
 
 ### 2. Configure Your IDE
 
-Add to your Claude Desktop or Cursor MCP configuration.
+Add to your Claude Desktop, Claude Code, or Cursor MCP configuration.
 
 **Single Database Example:**
 
