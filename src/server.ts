@@ -12,10 +12,12 @@ const mcpServer = new McpServer({
   version: "0.0.1",
 });
 
-mcpServer.tool(
+mcpServer.registerTool(
   "list_storages",
-  "List all configured storage connections (RDB, NoSQL, Athena, etc.)",
-  {},
+  {
+    description: "List all configured storage connections (RDB, NoSQL, Athena, etc.)",
+    inputSchema: {},
+  },
   () => {
     const result = {
       storages: storageConfigs.map(config => ({
@@ -38,13 +40,15 @@ mcpServer.tool(
 );
 
 // @ts-ignore - Type instantiation depth issue with MCP SDK
-mcpServer.tool(
+mcpServer.registerTool(
   "query",
-  "Execute a query on any storage (SQL for RDB/Athena, NoSQL query for MongoDB, etc.)",
   {
-    storage_id: z.string().describe("Storage connection ID to use"),
-    query: z.string().describe("Query to execute (SQL, MongoDB query JSON, etc.)"),
-    parameters: z.any().optional().describe("Optional query parameters"),
+    description: "Execute a query on any storage (SQL for RDB/Athena, NoSQL query for MongoDB, etc.)",
+    inputSchema: {
+      storage_id: z.string().describe("Storage connection ID to use"),
+      query: z.string().describe("Query to execute (SQL, MongoDB query JSON, etc.)"),
+      parameters: z.any().optional().describe("Optional query parameters"),
+    },
   },
   async ({ storage_id, query, parameters }) => {
     const config = storageConfigs.find(c => c.id === storage_id);
@@ -65,13 +69,15 @@ mcpServer.tool(
 );
 
 // @ts-ignore - Type instantiation depth issue with MCP SDK
-mcpServer.tool(
+mcpServer.registerTool(
   "execute",
-  "Execute write operations (INSERT, UPDATE, DELETE for SQL; insert, update for NoSQL)",
   {
-    storage_id: z.string().describe("Storage connection ID to use"),
-    operation: z.string().describe("Operation to execute (SQL statement or NoSQL operation)"),
-    parameters: z.any().optional().describe("Optional operation parameters"),
+    description: "Execute write operations (INSERT, UPDATE, DELETE for SQL; insert, update for NoSQL)",
+    inputSchema: {
+      storage_id: z.string().describe("Storage connection ID to use"),
+      operation: z.string().describe("Operation to execute (SQL statement or NoSQL operation)"),
+      parameters: z.any().optional().describe("Optional operation parameters"),
+    },
   },
   async ({ storage_id, operation, parameters }) => {
     const config = storageConfigs.find(c => c.id === storage_id);
@@ -91,12 +97,15 @@ mcpServer.tool(
   }
 );
 
-mcpServer.tool(
+// @ts-ignore - Type instantiation depth issue with MCP SDK
+mcpServer.registerTool(
   "list_collections",
-  "List collections/tables/datasets in a storage (tables for RDB, collections for NoSQL, datasets for Athena)",
   {
-    storage_id: z.string().describe("Storage connection ID"),
-    schema: z.string().optional().describe("Schema/database name (optional, for RDB/Athena)"),
+    description: "List collections/tables/datasets in a storage (tables for RDB, collections for NoSQL, datasets for Athena)",
+    inputSchema: {
+      storage_id: z.string().describe("Storage connection ID"),
+      schema: z.string().optional().describe("Schema/database name (optional, for RDB/Athena)"),
+    },
   },
   async ({ storage_id, schema }) => {
     const config = storageConfigs.find(c => c.id === storage_id);
@@ -116,13 +125,16 @@ mcpServer.tool(
   }
 );
 
-mcpServer.tool(
+// @ts-ignore - Type instantiation depth issue with MCP SDK
+mcpServer.registerTool(
   "describe_collection",
-  "Get schema/structure information for a collection/table",
   {
-    storage_id: z.string().describe("Storage connection ID"),
-    collection: z.string().describe("Collection/table name"),
-    schema: z.string().optional().describe("Schema/database name (optional)"),
+    description: "Get schema/structure information for a collection/table",
+    inputSchema: {
+      storage_id: z.string().describe("Storage connection ID"),
+      collection: z.string().describe("Collection/table name"),
+      schema: z.string().optional().describe("Schema/database name (optional)"),
+    },
   },
   async ({ storage_id, collection, schema }) => {
     const config = storageConfigs.find(c => c.id === storage_id);
@@ -142,11 +154,14 @@ mcpServer.tool(
   }
 );
 
-mcpServer.tool(
+// @ts-ignore - Type instantiation depth issue with MCP SDK
+mcpServer.registerTool(
   "get_storage_info",
-  "Get detailed information about a specific storage connection",
   {
-    storage_id: z.string().describe("Storage connection ID"),
+    description: "Get detailed information about a specific storage connection",
+    inputSchema: {
+      storage_id: z.string().describe("Storage connection ID"),
+    },
   },
   async ({ storage_id }) => {
     const config = storageConfigs.find(c => c.id === storage_id);
