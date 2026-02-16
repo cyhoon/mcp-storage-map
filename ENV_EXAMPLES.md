@@ -3,35 +3,30 @@
 ## 1. Multiple Storage Configuration (Recommended)
 
 ```bash
-# MySQL Database
-STORAGE_MYSQL_TYPE=mysql
-STORAGE_MYSQL_HOST=localhost
-STORAGE_MYSQL_PORT=3306
-STORAGE_MYSQL_USER=root
-STORAGE_MYSQL_PASSWORD=password
-STORAGE_MYSQL_DATABASE=myapp
-STORAGE_MYSQL_WRITE_MODE=true
+# MySQL Production Database (read-only)
+STORAGE_PROD_TYPE=mysql
+STORAGE_PROD_HOST=prod-db.example.com
+STORAGE_PROD_PORT=3306
+STORAGE_PROD_USER=readonly
+STORAGE_PROD_PASSWORD=secret
+STORAGE_PROD_DATABASE=production
+STORAGE_PROD_WRITE_MODE=false
 
-# PostgreSQL Analytics
-STORAGE_POSTGRES_TYPE=postgresql
-STORAGE_POSTGRES_HOST=analytics.example.com
-STORAGE_POSTGRES_PORT=5432
-STORAGE_POSTGRES_USER=analyst
-STORAGE_POSTGRES_PASSWORD=secret
-STORAGE_POSTGRES_DATABASE=analytics
-STORAGE_POSTGRES_WRITE_MODE=false
+# MySQL Staging Database (read-write)
+STORAGE_STAGING_TYPE=mysql
+STORAGE_STAGING_HOST=staging-db.example.com
+STORAGE_STAGING_PORT=3306
+STORAGE_STAGING_USER=admin
+STORAGE_STAGING_PASSWORD=secret
+STORAGE_STAGING_DATABASE=staging
+STORAGE_STAGING_WRITE_MODE=true
 
-# MongoDB Logs
-STORAGE_MONGO_TYPE=mongodb
-STORAGE_MONGO_URI=mongodb://localhost:27017/logs
-STORAGE_MONGO_WRITE_MODE=true
-
-# AWS Athena
+# AWS Athena Analytics
 STORAGE_ATHENA_TYPE=athena
-STORAGE_ATHENA_REGION=us-east-1
-STORAGE_ATHENA_S3_OUTPUT_LOCATION=s3://my-bucket/athena-results/
+STORAGE_ATHENA_REGION=us-west-2
+STORAGE_ATHENA_S3_OUTPUT_LOCATION=s3://analytics-results/
 STORAGE_ATHENA_WORKGROUP=primary
-STORAGE_ATHENA_DATABASE=datalake
+STORAGE_ATHENA_DATABASE=analytics
 ```
 
 ## 2. JSON Configuration
@@ -51,11 +46,14 @@ STORAGE_CONFIG='[
     }
   },
   {
-    "id": "mongo-logs",
-    "type": "mongodb",
+    "id": "athena-analytics",
+    "type": "athena",
     "writeMode": false,
     "connection": {
-      "uri": "mongodb://localhost:27017/logs"
+      "region": "us-east-1",
+      "s3OutputLocation": "s3://my-bucket/athena-results/",
+      "workgroup": "primary",
+      "database": "datalake"
     }
   }
 ]'
@@ -79,17 +77,21 @@ DB_WRITE_MODE=true
 {
   "mcpServers": {
     "storage-map": {
-      "command": "npx",
-      "args": ["tsx", "/path/to/storage-map/src/server.ts"],
+      "command": "pnpm",
+      "args": ["dlx", "@storage-map/mcp-server"],
       "env": {
         "STORAGE_MYSQL_TYPE": "mysql",
         "STORAGE_MYSQL_HOST": "localhost",
+        "STORAGE_MYSQL_PORT": "3306",
         "STORAGE_MYSQL_USER": "root",
         "STORAGE_MYSQL_PASSWORD": "password",
         "STORAGE_MYSQL_DATABASE": "myapp",
         "STORAGE_MYSQL_WRITE_MODE": "true",
-        "STORAGE_MONGO_TYPE": "mongodb",
-        "STORAGE_MONGO_URI": "mongodb://localhost:27017/logs"
+
+        "STORAGE_ATHENA_TYPE": "athena",
+        "STORAGE_ATHENA_REGION": "us-west-2",
+        "STORAGE_ATHENA_DATABASE": "analytics",
+        "STORAGE_ATHENA_S3_OUTPUT_LOCATION": "s3://analytics-results/"
       }
     }
   }
@@ -100,24 +102,25 @@ DB_WRITE_MODE=true
 
 ### Pattern: `STORAGE_<ID>_<PROPERTY>`
 
-- `<ID>`: Unique identifier for the storage (e.g., MYSQL, POSTGRES, MONGO)
+- `<ID>`: Unique identifier for the storage (e.g., MYSQL, PROD, STAGING, ATHENA)
 - `<PROPERTY>`: Configuration property
-  - `TYPE`: Storage type (mysql, postgresql, mongodb, athena, etc.)
+  - `TYPE`: Storage type (`mysql` or `athena`)
+  - `WRITE_MODE`: Enable write operations (true/false)
+
+  **MySQL Properties:**
   - `HOST`: Database host
-  - `PORT`: Database port
+  - `PORT`: Database port (default: 3306)
   - `USER`: Username
   - `PASSWORD`: Password
   - `DATABASE`: Database name
-  - `WRITE_MODE`: Enable write operations (true/false)
-  - `URI`: Connection URI (for MongoDB)
-  - `REGION`: AWS region (for Athena)
-  - `S3_OUTPUT_LOCATION`: S3 output location (for Athena)
-  - `WORKGROUP`: Athena workgroup
-  - `PROJECT_ID`: GCP project ID (for BigQuery)
-  - `DATASET_ID`: BigQuery dataset ID
-  - `KEY_FILE_PATH`: Service account key path (for BigQuery)
+
+  **Athena Properties:**
+  - `REGION`: AWS region (default: us-east-1)
+  - `DATABASE`: Athena database/catalog (default: default)
+  - `S3_OUTPUT_LOCATION`: S3 path for query results
+  - `WORKGROUP`: Athena workgroup (default: primary)
 
 ### Storage IDs
 - IDs are converted to lowercase and underscores to hyphens
 - `STORAGE_MYSQL_MAIN_*` becomes storage ID `mysql-main`
-- `STORAGE_POSTGRES_ANALYTICS_*` becomes storage ID `postgres-analytics`
+- `STORAGE_ATHENA_ANALYTICS_*` becomes storage ID `athena-analytics`
