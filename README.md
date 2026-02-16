@@ -20,7 +20,9 @@ pnpm dlx @storage-map/mcp-server
 
 ### 2. Configure Your IDE
 
-Add to your Claude Desktop or Cursor MCP configuration:
+Add to your Claude Desktop or Cursor MCP configuration.
+
+**Single Database Example:**
 
 ```json
 {
@@ -32,21 +34,51 @@ Add to your Claude Desktop or Cursor MCP configuration:
         "STORAGE_MYSQL_TYPE": "mysql",
         "STORAGE_MYSQL_HOST": "localhost",
         "STORAGE_MYSQL_PORT": "3306",
-        "STORAGE_MYSQL_USER": "your_username",
-        "STORAGE_MYSQL_PASSWORD": "your_password",
-        "STORAGE_MYSQL_DATABASE": "your_database",
-        "STORAGE_MYSQL_WRITE_MODE": "false",
-
-        "STORAGE_ATHENA_TYPE": "athena",
-        "STORAGE_ATHENA_REGION": "us-east-1",
-        "STORAGE_ATHENA_DATABASE": "your_database",
-        "STORAGE_ATHENA_S3_OUTPUT_LOCATION": "s3://your-bucket/query-results/",
-        "STORAGE_ATHENA_WORKGROUP": "primary"
+        "STORAGE_MYSQL_USER": "root",
+        "STORAGE_MYSQL_PASSWORD": "password",
+        "STORAGE_MYSQL_DATABASE": "myapp",
+        "STORAGE_MYSQL_WRITE_MODE": "false"
       }
     }
   }
 }
 ```
+
+**Multiple Databases Example:**
+
+```json
+{
+  "mcpServers": {
+    "storage-map": {
+      "command": "pnpm",
+      "args": ["dlx", "@storage-map/mcp-server"],
+      "env": {
+        "STORAGE_PROD_TYPE": "mysql",
+        "STORAGE_PROD_HOST": "prod-db.example.com",
+        "STORAGE_PROD_PORT": "3306",
+        "STORAGE_PROD_USER": "readonly",
+        "STORAGE_PROD_PASSWORD": "secret",
+        "STORAGE_PROD_DATABASE": "production",
+
+        "STORAGE_STAGING_TYPE": "mysql",
+        "STORAGE_STAGING_HOST": "staging-db.example.com",
+        "STORAGE_STAGING_PORT": "3306",
+        "STORAGE_STAGING_USER": "admin",
+        "STORAGE_STAGING_PASSWORD": "secret",
+        "STORAGE_STAGING_DATABASE": "staging",
+        "STORAGE_STAGING_WRITE_MODE": "true",
+
+        "STORAGE_ANALYTICS_TYPE": "athena",
+        "STORAGE_ANALYTICS_REGION": "us-west-2",
+        "STORAGE_ANALYTICS_DATABASE": "analytics",
+        "STORAGE_ANALYTICS_S3_OUTPUT_LOCATION": "s3://analytics-results/"
+      }
+    }
+  }
+}
+```
+
+> **Tip**: Each database connection needs a unique ID (the part after `STORAGE_` and before the property name). In the examples above: `MYSQL`, `PROD`, `STAGING`, and `ANALYTICS` are the IDs.
 
 ### 3. Start Using
 
@@ -87,41 +119,78 @@ Storage Map uses a flexible configuration system with environment variables:
 
 **Pattern**: `STORAGE_<ID>_<PROPERTY>`
 
-- `<ID>`: Unique identifier for your storage (e.g., `MYSQL`, `ATHENA`, `PROD_DB`)
+- `<ID>`: Unique identifier for your storage connection (e.g., `MYSQL`, `PROD`, `STAGING`, `ANALYTICS`)
+  - Use descriptive names to identify each connection
+  - Same database type can have multiple IDs (e.g., `PROD_DB` and `STAGING_DB` for different MySQL servers)
 - `<PROPERTY>`: Configuration property (e.g., `TYPE`, `HOST`, `PORT`)
 
 **Common Properties**:
-- `TYPE`: Database type (`mysql`, `athena`, `postgresql`, etc.)
+- `TYPE`: Database type (`mysql`, `athena`, `postgresql`, etc.) - **Required**
 - `WRITE_MODE`: Enable write operations (`true` or `false`, default: `false`)
 
 **MySQL/PostgreSQL**:
-- `HOST`: Database host
-- `PORT`: Database port
-- `USER`: Username
-- `PASSWORD`: Password
-- `DATABASE`: Database name
+- `HOST`: Database host - **Required**
+- `PORT`: Database port (default: `3306` for MySQL, `5432` for PostgreSQL)
+- `USER`: Username - **Required**
+- `PASSWORD`: Password - **Required**
+- `DATABASE`: Database name - **Required**
 
 **AWS Athena**:
-- `REGION`: AWS region
-- `DATABASE`: Athena database/catalog
-- `S3_OUTPUT_LOCATION`: S3 path for query results (required)
+- `REGION`: AWS region (default: `us-east-1`)
+- `DATABASE`: Athena database/catalog (default: `default`)
+- `S3_OUTPUT_LOCATION`: S3 path for query results - **Required**
 - `WORKGROUP`: Athena workgroup (default: `primary`)
 
-### Example: Multiple Databases
+### Configuration Examples
 
-```json
-{
-  "env": {
-    "STORAGE_PROD_MYSQL_TYPE": "mysql",
-    "STORAGE_PROD_MYSQL_HOST": "prod-db.example.com",
-    "STORAGE_PROD_MYSQL_USER": "readonly",
+**Example 1: Single MySQL Database**
 
-    "STORAGE_ANALYTICS_TYPE": "athena",
-    "STORAGE_ANALYTICS_REGION": "us-west-2",
-    "STORAGE_ANALYTICS_DATABASE": "analytics",
-    "STORAGE_ANALYTICS_S3_OUTPUT_LOCATION": "s3://analytics-results/"
-  }
-}
+```bash
+STORAGE_MYSQL_TYPE=mysql
+STORAGE_MYSQL_HOST=localhost
+STORAGE_MYSQL_PORT=3306
+STORAGE_MYSQL_USER=root
+STORAGE_MYSQL_PASSWORD=password
+STORAGE_MYSQL_DATABASE=myapp
+```
+
+**Example 2: Multiple MySQL Databases (Prod + Staging)**
+
+```bash
+# Production (read-only)
+STORAGE_PROD_TYPE=mysql
+STORAGE_PROD_HOST=prod-db.example.com
+STORAGE_PROD_PORT=3306
+STORAGE_PROD_USER=readonly
+STORAGE_PROD_PASSWORD=secret
+STORAGE_PROD_DATABASE=production
+
+# Staging (read-write)
+STORAGE_STAGING_TYPE=mysql
+STORAGE_STAGING_HOST=staging-db.example.com
+STORAGE_STAGING_PORT=3306
+STORAGE_STAGING_USER=admin
+STORAGE_STAGING_PASSWORD=secret
+STORAGE_STAGING_DATABASE=staging
+STORAGE_STAGING_WRITE_MODE=true
+```
+
+**Example 3: MySQL + Athena**
+
+```bash
+# MySQL for operational data
+STORAGE_DB_TYPE=mysql
+STORAGE_DB_HOST=localhost
+STORAGE_DB_PORT=3306
+STORAGE_DB_USER=admin
+STORAGE_DB_PASSWORD=password
+STORAGE_DB_DATABASE=myapp
+
+# Athena for analytics
+STORAGE_ANALYTICS_TYPE=athena
+STORAGE_ANALYTICS_REGION=us-west-2
+STORAGE_ANALYTICS_DATABASE=analytics
+STORAGE_ANALYTICS_S3_OUTPUT_LOCATION=s3://my-bucket/athena-results/
 ```
 
 ## Features
