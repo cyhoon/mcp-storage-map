@@ -22,6 +22,44 @@ npx storage-map-mcp
 
 Add to your Claude Desktop, Claude Code, or Cursor MCP configuration.
 
+#### Option A: Using Claude CLI (Recommended)
+
+**Single Database Example:**
+
+```bash
+claude mcp add storage-map \
+  -e STORAGE_LOCAL_TYPE=mysql \
+  -e STORAGE_LOCAL_HOST=localhost \
+  -e STORAGE_LOCAL_PORT=3306 \
+  -e STORAGE_LOCAL_USER=root \
+  -e STORAGE_LOCAL_PASSWORD=your_password \
+  -e STORAGE_LOCAL_DATABASE=your_database \
+  -e STORAGE_LOCAL_WRITE_MODE=true \
+  -- npx storage-map-mcp
+```
+
+**Multiple Databases Example:**
+
+```bash
+claude mcp add storage-map \
+  -e STORAGE_PROD_TYPE=mysql \
+  -e STORAGE_PROD_HOST=prod-db.example.com \
+  -e STORAGE_PROD_PORT=3306 \
+  -e STORAGE_PROD_USER=readonly \
+  -e STORAGE_PROD_PASSWORD=secret \
+  -e STORAGE_PROD_DATABASE=production \
+  -e STORAGE_STAGING_TYPE=mysql \
+  -e STORAGE_STAGING_HOST=staging-db.example.com \
+  -e STORAGE_STAGING_PORT=3306 \
+  -e STORAGE_STAGING_USER=admin \
+  -e STORAGE_STAGING_PASSWORD=secret \
+  -e STORAGE_STAGING_DATABASE=staging \
+  -e STORAGE_STAGING_WRITE_MODE=true \
+  -- npx storage-map-mcp
+```
+
+#### Option B: Manual JSON Configuration
+
 **Single Database Example:**
 
 ```json
