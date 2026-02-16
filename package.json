@@ -1,5 +1,5 @@
 {
-  "name": "@storage-map/mcp-server",
+  "name": "storage-map-mcp",
   "version": "0.1.0",
   "description": "MCP server for unified database and storage access",
   "main": "build/index.js",
@@ -35,7 +35,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cyhoon/mcp-storage-map.git"
+    "url": "git+https://github.com/cyhoon/mcp-storage-map.git"
   },
   "bugs": {
     "url": "https://github.com/cyhoon/mcp-storage-map/issues"
