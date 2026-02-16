@@ -1,7 +1,7 @@
 # MCP Storage Map
 
 ![License](https://img.shields.io/github/license/cyhoon/mcp-storage-map)
-![Node Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)
+![Node Version](https://img.shields.io/badge/node-%3E%3D24.13.1-brightgreen)
 
 Model Context Protocol (MCP) server for unified database and storage access. Query multiple databases (MySQL, AWS Athena, and more) through a single, consistent interface.
 
