@@ -95,10 +95,6 @@ Ask your AI assistant to:
 |----------|--------|---------|
 | MySQL | ✅ Fully supported | 5.7+ |
 | AWS Athena | ✅ Fully supported | All versions |
-| PostgreSQL | 🔄 Planned | - |
-| MongoDB | 🔄 Planned | - |
-| BigQuery | 🔄 Planned | - |
-| Redis | 🔄 Planned | - |
 
 ## Key Tools
 
@@ -125,12 +121,12 @@ Storage Map uses a flexible configuration system with environment variables:
 - `<PROPERTY>`: Configuration property (e.g., `TYPE`, `HOST`, `PORT`)
 
 **Common Properties**:
-- `TYPE`: Database type (`mysql`, `athena`, `postgresql`, etc.) - **Required**
+- `TYPE`: Database type (`mysql`, `athena`) - **Required**
 - `WRITE_MODE`: Enable write operations (`true` or `false`, default: `false`)
 
-**MySQL/PostgreSQL**:
+**MySQL**:
 - `HOST`: Database host - **Required**
-- `PORT`: Database port (default: `3306` for MySQL, `5432` for PostgreSQL)
+- `PORT`: Database port (default: `3306`)
 - `USER`: Username - **Required**
 - `PASSWORD`: Password - **Required**
 - `DATABASE`: Database name - **Required**
@@ -203,9 +199,6 @@ All connections are read-only by default. Explicitly enable `WRITE_MODE` for wri
 
 ### Multiple Connections
 Configure multiple databases of the same or different types simultaneously.
-
-### Type-Safe
-Built with TypeScript, providing type safety and better developer experience.
 
 ### Extensible Architecture
 Easy to add new database connectors with the `McpConnector` interface.
