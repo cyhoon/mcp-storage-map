@@ -37,13 +37,14 @@ mcpServer.tool(
   }
 );
 
+// @ts-ignore - Type instantiation depth issue with MCP SDK
 mcpServer.tool(
   "query",
   "Execute a query on any storage (SQL for RDB/Athena, NoSQL query for MongoDB, etc.)",
   {
     storage_id: z.string().describe("Storage connection ID to use"),
     query: z.string().describe("Query to execute (SQL, MongoDB query JSON, etc.)"),
-    parameters: z.object({}).passthrough().optional().describe("Optional query parameters"),
+    parameters: z.any().optional().describe("Optional query parameters"),
   },
   async ({ storage_id, query, parameters }) => {
     const config = storageConfigs.find(c => c.id === storage_id);
@@ -63,13 +64,14 @@ mcpServer.tool(
   }
 );
 
+// @ts-ignore - Type instantiation depth issue with MCP SDK
 mcpServer.tool(
   "execute",
   "Execute write operations (INSERT, UPDATE, DELETE for SQL; insert, update for NoSQL)",
   {
     storage_id: z.string().describe("Storage connection ID to use"),
     operation: z.string().describe("Operation to execute (SQL statement or NoSQL operation)"),
-    parameters: z.object({}).passthrough().optional().describe("Optional operation parameters"),
+    parameters: z.any().optional().describe("Optional operation parameters"),
   },
   async ({ storage_id, operation, parameters }) => {
     const config = storageConfigs.find(c => c.id === storage_id);

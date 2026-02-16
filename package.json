@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "type": "module",
+  "packageManager": "pnpm@10.18.0",
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
@@ -12,8 +13,7 @@
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf build",
-    "prepare": "npm run build"
+    "clean": "rm -rf build"
   },
   "keywords": [
     "mcp",
@@ -49,6 +49,6 @@
     "vitest": "^1.1.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=24.13.1"
   }
 }

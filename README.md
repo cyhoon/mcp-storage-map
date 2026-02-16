@@ -10,12 +10,12 @@ Model Context Protocol (MCP) server for unified database and storage access. Que
 ### 1. Installation
 
 ```bash
-npm install -g @storage-map/mcp-server
+pnpm add -g @storage-map/mcp-server
 ```
 
-Or run directly with npx:
+Or run directly with pnpm dlx:
 ```bash
-npx @storage-map/mcp-server
+pnpm dlx @storage-map/mcp-server
 ```
 
 ### 2. Configure Your IDE
@@ -26,8 +26,8 @@ Add to your Claude Desktop or Cursor MCP configuration:
 {
   "mcpServers": {
     "storage-map": {
-      "command": "npx",
-      "args": ["@storage-map/mcp-server"],
+      "command": "pnpm",
+      "args": ["dlx", "@storage-map/mcp-server"],
       "env": {
         "STORAGE_MYSQL_TYPE": "mysql",
         "STORAGE_MYSQL_HOST": "localhost",
@@ -183,19 +183,19 @@ git clone https://github.com/cyhoon/mcp-storage-map.git
 cd mcp-storage-map
 
 # Install dependencies
-npm install
+pnpm install
 
 # Run in development mode
-npm run dev
+pnpm dev
 
 # Build
-npm run build
+pnpm build
 
 # Run tests
-npm test
+pnpm test
 
 # Lint
-npm run lint
+pnpm lint
 ```
 
 ## License
