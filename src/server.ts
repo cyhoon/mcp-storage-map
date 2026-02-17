@@ -3,7 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { parseStorageConfigs, StorageConfig } from "./config.js";
 import { registry } from "./mcp-connectors/index.js";
-import { MySQLConnector, AthenaConnector } from "./clients/index.js";
+import { MySQLConnector, AthenaConnector, MongoDBConnector } from "./clients/index.js";
 
 let storageConfigs: StorageConfig[] = [];
 
@@ -205,7 +205,7 @@ function initializeStorages() {
 
   registry.register('mysql', MySQLConnector);
   registry.register('athena', AthenaConnector);
-  // registry.register('mongodb', MongoDBConnector);
+  registry.register('mongodb', MongoDBConnector);
   
   storageConfigs.forEach(config => {
     console.error(`  - ${config.id} (${config.type}) writeMode=${config.writeMode || false}`);

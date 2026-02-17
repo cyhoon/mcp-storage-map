@@ -14,6 +14,10 @@ export interface StorageConfig {
     region?: string;
     s3OutputLocation?: string;
     workgroup?: string;
+    // MongoDB specific
+    uri?: string;
+    authSource?: string;
+    replicaSet?: string;
     // BigQuery specific
     projectId?: string;
     datasetId?: string;
@@ -86,6 +90,12 @@ export function parseStorageConfigs(): StorageConfig[] {
     } else if (propName === 'key_file_path') {
       storageEnvs[storageId].connection = storageEnvs[storageId].connection || {};
       storageEnvs[storageId].connection.keyFilePath = value;
+    } else if (propName === 'auth_source') {
+      storageEnvs[storageId].connection = storageEnvs[storageId].connection || {};
+      storageEnvs[storageId].connection.authSource = value;
+    } else if (propName === 'replica_set') {
+      storageEnvs[storageId].connection = storageEnvs[storageId].connection || {};
+      storageEnvs[storageId].connection.replicaSet = value;
     }
   }
 
