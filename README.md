@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/github/license/cyhoon/mcp-storage-map)
 ![Node Version](https://img.shields.io/badge/node-%3E%3D24.13.1-brightgreen)
 
-Model Context Protocol (MCP) server for unified database and storage access. Query multiple databases (MySQL, AWS Athena, and more) through a single, consistent interface.
+Model Context Protocol (MCP) server for unified database and storage access. Query multiple databases (MySQL, MongoDB, AWS Athena, and more) through a single, consistent interface.
 
 ## Quick Start
 
@@ -35,6 +35,16 @@ claude mcp add storage-map \
   -e STORAGE_LOCAL_PASSWORD=your_password \
   -e STORAGE_LOCAL_DATABASE=your_database \
   -e STORAGE_LOCAL_WRITE_MODE=true \
+  -- npx storage-map-mcp
+```
+
+**MongoDB Example:**
+
+```bash
+claude mcp add storage-map \
+  -e STORAGE_MONGO_TYPE=mongodb \
+  -e STORAGE_MONGO_URI=mongodb://localhost:27017/myapp \
+  -e STORAGE_MONGO_DATABASE=myapp \
   -- npx storage-map-mcp
 ```
 
@@ -82,6 +92,24 @@ claude mcp add storage-map \
 }
 ```
 
+**MongoDB Example:**
+
+```json
+{
+  "mcpServers": {
+    "storage-map": {
+      "command": "npx",
+      "args": ["storage-map-mcp"],
+      "env": {
+        "STORAGE_MONGO_TYPE": "mongodb",
+        "STORAGE_MONGO_URI": "mongodb://localhost:27017/myapp",
+        "STORAGE_MONGO_DATABASE": "myapp"
+      }
+    }
+  }
+}
+```
+
 **Multiple Databases Example:**
 
 ```json
@@ -123,8 +151,9 @@ claude mcp add storage-map \
 Ask your AI assistant to:
 - **"List all my configured databases"**
 - **"Query the users table from my MySQL database"**
+- **"Find users older than 25 in MongoDB"**
 - **"Show me tables in my Athena database"**
-- **"Get the schema for the orders table"**
+- **"Get the schema for the orders collection"**
 - **"Execute SELECT * FROM products LIMIT 10 on mysql storage"**
 
 ## Compatibility
@@ -132,6 +161,7 @@ Ask your AI assistant to:
 | Database | Status | Version |
 |----------|--------|---------|
 | MySQL | ✅ Fully supported | 5.7+ |
+| MongoDB | ✅ Fully supported | 4.4+ |
 | AWS Athena | ✅ Fully supported | All versions |
 
 ## Key Tools
@@ -159,7 +189,7 @@ Storage Map uses a flexible configuration system with environment variables:
 - `<PROPERTY>`: Configuration property (e.g., `TYPE`, `HOST`, `PORT`)
 
 **Common Properties**:
-- `TYPE`: Database type (`mysql`, `athena`) - **Required**
+- `TYPE`: Database type (`mysql`, `mongodb`, `athena`) - **Required**
 - `WRITE_MODE`: Enable write operations (`true` or `false`, default: `false`)
 
 **MySQL**:
@@ -168,6 +198,16 @@ Storage Map uses a flexible configuration system with environment variables:
 - `USER`: Username - **Required**
 - `PASSWORD`: Password - **Required**
 - `DATABASE`: Database name - **Required**
+
+**MongoDB**:
+- `URI`: Full connection string (e.g., `mongodb://localhost:27017/mydb`) - Use this **or** HOST/PORT
+- `HOST`: MongoDB host (default: `localhost`)
+- `PORT`: MongoDB port (default: `27017`)
+- `USER`: Username (optional)
+- `PASSWORD`: Password (optional)
+- `DATABASE`: Database name - **Required**
+- `AUTH_SOURCE`: Authentication database (optional)
+- `REPLICA_SET`: Replica set name (optional)
 
 **AWS Athena**:
 - `REGION`: AWS region (default: `us-east-1`)
@@ -209,7 +249,28 @@ STORAGE_STAGING_DATABASE=staging
 STORAGE_STAGING_WRITE_MODE=true
 ```
 
-**Example 3: MySQL + Athena**
+**Example 3: MongoDB (URI)**
+
+```bash
+STORAGE_MONGO_TYPE=mongodb
+STORAGE_MONGO_URI=mongodb://localhost:27017/myapp
+STORAGE_MONGO_DATABASE=myapp
+```
+
+**Example 4: MongoDB (Host/Port with Auth)**
+
+```bash
+STORAGE_MONGO_TYPE=mongodb
+STORAGE_MONGO_HOST=mongo.example.com
+STORAGE_MONGO_PORT=27017
+STORAGE_MONGO_USER=admin
+STORAGE_MONGO_PASSWORD=secret
+STORAGE_MONGO_DATABASE=myapp
+STORAGE_MONGO_AUTH_SOURCE=admin
+STORAGE_MONGO_WRITE_MODE=true
+```
+
+**Example 5: MySQL + MongoDB + Athena**
 
 ```bash
 # MySQL for operational data
@@ -219,6 +280,11 @@ STORAGE_DB_PORT=3306
 STORAGE_DB_USER=admin
 STORAGE_DB_PASSWORD=password
 STORAGE_DB_DATABASE=myapp
+
+# MongoDB for document store
+STORAGE_MONGO_TYPE=mongodb
+STORAGE_MONGO_URI=mongodb://localhost:27017/documents
+STORAGE_MONGO_DATABASE=documents
 
 # Athena for analytics
 STORAGE_ANALYTICS_TYPE=athena
@@ -254,12 +320,12 @@ Easy to add new database connectors with the `McpConnector` interface.
       │   Registry     │
       └───────┬────────┘
               │
-    ┌─────────┴──────────┐
-    │                    │
-┌───▼──────┐      ┌─────▼─────┐
-│  MySQL   │      │  Athena   │
-│Connector │      │ Connector │
-└──────────┘      └───────────┘
+    ┌─────────┼──────────────────┐
+    │         │                  │
+┌───▼──────┐ ┌▼────────┐ ┌─────▼─────┐
+│  MySQL   │ │ MongoDB │ │  Athena   │
+│Connector │ │Connector│ │ Connector │
+└──────────┘ └─────────┘ └───────────┘
 ```
 
 Each connector implements the `McpConnector` interface:
